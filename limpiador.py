@@ -78,35 +78,75 @@ def incrementar_saturacion(imagen, factor):
     
     return imagen_rgb
 
+# quitar la pimienta de la imagen
+def quitar_pimienta(imagen):
+    # Crear una copia de la imagen para no modificar la original
+    imagen_sin_pimienta = imagen.copy()
+    
+    # Recorrer cada píxel de la imagen
+    for i in range(imagen.shape[0]):
+        for j in range(imagen.shape[1]):
+            # Verificar si el píxel es negro
+            if np.array_equal(imagen[i, j], [0, 0, 0]):
+                # Cambiar el píxel a blanco
+                imagen_sin_pimienta[i, j] = [255, 255, 255]
+    
+    return imagen_sin_pimienta
+
+# quitar sal de la imagen
+def quitar_sal(imagen):
+    # Crear una copia de la imagen para no modificar la original
+    imagen_sin_sal = imagen.copy()
+    
+    # Recorrer cada píxel de la imagen
+    for i in range(imagen.shape[0]):
+        for j in range(imagen.shape[1]):
+            # Verificar si el píxel es blanco
+            if np.array_equal(imagen[i, j], [255, 255, 255]):
+                # Cambiar el píxel a negro
+                imagen_sin_sal[i, j] = [0, 0, 0]
+    
+    return imagen_sin_sal
+
+
 # Ejemplo de uso
 if __name__ == '__main__':
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
+    procesamiento = 5
 
-    # Aplicar erosión y dilatación
-    imagen_erosionada = erosionar_imagen(imagen, elemento_estructurante)
-    imagen_dilatada = dilatar_imagen(imagen, elemento_estructurante)
+    imagen_sin_sal = quitar_sal(imagen)
+    imagen_sin_pimienta = quitar_pimienta(imagen)
 
-    # Guardar ambas imágenes
-    guardar_imagen(imagen_erosionada, 'imagen_erosionada')
-    guardar_imagen(imagen_dilatada, 'imagen_dilatada')
+    for i in range(procesamiento):
+        imagen_erosionada = erosionar_imagen(imagen_sin_pimienta, elemento_estructurante)
+        imagen_dilatada = dilatar_imagen(imagen_sin_sal, elemento_estructurante)
+        imagen_sin_sal = quitar_sal(imagen_erosionada)
+        imagen_sin_pimienta = quitar_pimienta(imagen_dilatada)
 
-    # Generar imagen sin ruido
+    # Ajustar la intensidad de los pixeles
+    factor_ajuste = 0.8
+    imagen_ajustada = ajustar_imagen(imagen, factor_ajuste)
+
+    # Ajustar los colores RGB de la imagen
+    imagen_ajustada_rgb = ajustar_colores_rgb(imagen_ajustada)
+
+    # Incrementar la saturación de la imagen
+    factor_saturacion = 1.5
+    imagen_saturada = incrementar_saturacion(imagen_ajustada_rgb, factor_saturacion)
+
+    # Eliminar ruido de la imagen
     imagen_sin_ruido = eliminar_ruido(imagen_erosionada, imagen_dilatada)
 
-    imagen_sin_ruido = np.clip(imagen_sin_ruido, 0, 255)
-
-    # ajustar la intensidad de los pixeles
-    imagen_sin_ruido = ajustar_imagen(imagen_sin_ruido, 1.083)
-    imagen_sin_ruido = incrementar_saturacion(imagen_sin_ruido, 1.18)
-
-    for i in range(7):
-        imagen_sin_ruido =  dilatar_imagen(imagen_sin_ruido, elemento_estructurante)
-    
-    for i in range(1):
-        imagen_sin_ruido =  erosionar_imagen(imagen_sin_ruido, elemento_estructurante)
-
-    # Guardar imagen sin ruido
+    # Guardar todas las versiones de la imagen
+    guardar_imagen(imagen, 'imagen_original')
+    guardar_imagen(imagen_sin_sal, 'imagen_sin_sal')
+    guardar_imagen(imagen_sin_pimienta, 'imagen_sin_pimienta')
+    guardar_imagen(imagen_erosionada, 'imagen_erosionada')
+    guardar_imagen(imagen_dilatada, 'imagen_dilatada')
+    guardar_imagen(imagen_ajustada, 'imagen_ajustada')
+    guardar_imagen(imagen_ajustada_rgb, 'imagen_ajustada_rgb')
+    guardar_imagen(imagen_saturada, 'imagen_saturada')
     guardar_imagen(imagen_sin_ruido, 'imagen_sin_ruido')
 
-    print("Imágenes guardadas en la carpeta 'img'.")
+    print("Imágenes del proceso guardadas en la carpeta 'img'.")
