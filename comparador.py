@@ -40,6 +40,19 @@ def comparar_similitud(imagen_original_path, carpeta_imagenes):
     # Mostrar el porcentaje de similitud para cada imagen comparada
     for imagen_path, similitud in similitudes:
         print(f"Similitud con {imagen_path}: {similitud:.2f}%")
-
+def imprimir_contenido_txt(ruta_archivo):
+    try:
+        with open(ruta_archivo, 'r') as archivo:
+            contenido = archivo.read()
+            print(contenido)
+    except FileNotFoundError:
+        print(f"El archivo {ruta_archivo} no se encontró.")
+    except Exception as e:
+        print(f"Ocurrió un error al leer el archivo: {e}")
 # Ejemplo de uso
+print("Comparando imágenes paralelas...")
 comparar_similitud('pic.png', 'img')
+imprimir_contenido_txt('tiempo_ejecucion.txt')
+print("Comparando imágenes no paralelas...")
+comparar_similitud('pic.png', 'noparalelo/img')
+imprimir_contenido_txt('noparalelo/tiempo_ejecucion.txt')
