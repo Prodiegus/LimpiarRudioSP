@@ -5,70 +5,92 @@ from scipy.ndimage import grey_erosion, grey_dilation
 from PIL import Image
 from tqdm import tqdm
 import threading
+import multiprocessing as mp
 
 # Cargar imagen en formato RGB
 def cargar_imagen(filepath):
     return np.array(Image.open(filepath))
 
-# Función para aplicar erosión a un canal
-def erosionar_canal(canal, estructura, resultado, indice):
-    resultado[indice] = grey_erosion(canal, footprint=estructura)
+# Función para aplicar dilatacion a una parte de la imagen (multiprocessing)
+def dilatacion_canal(canal, element, inicio_fila, fin_fila):
+    sub_imagen = canal[inicio_fila:fin_fila, :]
+    return cv2.dilate(sub_imagen, element, iterations=1)
 
-# Función para aplicar dilatación a un canal
-def dilatar_canal(canal, estructura, resultado, indice):
-    resultado[indice] = grey_dilation(canal, footprint=estructura)
+# Función para aplicar erosión a una parte de la imagen (multiprocessing)
+def erosion_canal(canal, element, inicio_fila, fin_fila):
+    sub_imagen = canal[inicio_fila:fin_fila, :]
+    return cv2.erode(sub_imagen, element, iterations=1)
 
-# Aplicar Erosión a cada canal de la imagen
+# Función para aplicar erosión a una imagen completa (multiprocessing)
 def erosionar_imagen(imagen, estructura):
-    print("erosionando la imagen")
-    r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
+    print("Erosionando la imagen")
     
-    # Crear una lista para almacenar los resultados
-    resultado = [None, None, None]
+    # Dividir los canales RGB
+    r, g, b = imagen[:, :, 0], imagen[:, :, 1], imagen[:, :, 2]
     
-    # Crear hilos para cada canal
-    hilos = [
-        threading.Thread(target=erosionar_canal, args=(r, estructura, resultado, 0)),
-        threading.Thread(target=erosionar_canal, args=(g, estructura, resultado, 1)),
-        threading.Thread(target=erosionar_canal, args=(b, estructura, resultado, 2))
-    ]
+    # Dividir la imagen en partes para el procesamiento paralelo
+    alto_imagen = imagen.shape[0]
+    particiones = 4  # Número de particiones/procesos
+    alto_parte = alto_imagen // particiones
     
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
-    
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
-    
-    print("erosion terminada")
-    return np.stack(resultado, axis=-1)
+    canales = [r, g, b]
+    imagen_erosionada = []
 
-# Aplicar Dilatación a cada canal de la imagen
+    # Crear un pool de procesos
+    with mp.Pool(processes=particiones) as pool:
+        for canal in canales:
+            resultados = []
+            for i in range(particiones):
+                inicio_fila = i * alto_parte
+                fin_fila = (i + 1) * alto_parte if i != particiones - 1 else alto_imagen
+                resultado = pool.apply_async(erosion_canal, args=(canal, estructura, inicio_fila, fin_fila))
+                resultados.append(resultado)
+            
+            # Esperar a que todos los procesos terminen y recoger los resultados
+            sub_imagenes_erosionadas = [res.get() for res in resultados]
+            # Combinar las partes procesadas para formar el canal completo
+            imagen_erosionada.append(np.vstack(sub_imagenes_erosionadas))
+
+    # Combinar los canales erosionados nuevamente en una imagen RGB
+    imagen_final = cv2.merge(imagen_erosionada)
+    
+    print("Erosión terminada")
+    return imagen_final
+
 def dilatar_imagen(imagen, estructura):
-    print("dilatando la imagen")
-    r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
+    print("Dilatando la imagen")
     
-    # Crear una lista para almacenar los resultados
-    resultado = [None, None, None]
+    # Dividir los canales RGB
+    r, g, b = imagen[:, :, 0], imagen[:, :, 1], imagen[:, :, 2]
     
-    # Crear hilos para cada canal
-    hilos = [
-        threading.Thread(target=dilatar_canal, args=(r, estructura, resultado, 0)),
-        threading.Thread(target=dilatar_canal, args=(g, estructura, resultado, 1)),
-        threading.Thread(target=dilatar_canal, args=(b, estructura, resultado, 2))
-    ]
+    # Dividir la imagen en partes para el procesamiento paralelo
+    alto_imagen = imagen.shape[0]
+    particiones = 4  # Número de particiones/procesos
+    alto_parte = alto_imagen // particiones
     
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
+    canales = [r, g, b]
+    imagen_dilatada = []
+
+    # Crear un pool de procesos
+    with mp.Pool(processes=particiones) as pool:
+        for canal in canales:
+            resultados = []
+            for i in range(particiones):
+                inicio_fila = i * alto_parte
+                fin_fila = (i + 1) * alto_parte if i != particiones - 1 else alto_imagen
+                resultado = pool.apply_async(dilatacion_canal, args=(canal, estructura, inicio_fila, fin_fila))
+                resultados.append(resultado)
+            
+            # Esperar a que todos los procesos terminen y recoger los resultados
+            sub_imagenes_dilatadas = [res.get() for res in resultados]
+            # Combinar las partes procesadas para formar el canal completo
+            imagen_dilatada.append(np.vstack(sub_imagenes_dilatadas))
+
+    # Combinar los canales erosionados nuevamente en una imagen RGB
+    imagen_final = cv2.merge(imagen_dilatada)
     
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
-    
-    print("dilatacion terminada")
-    return np.stack(resultado, axis=-1)
+    print("Dilatación terminada")
+    return imagen_final
 
 # Generar imagen sin ruido a partir de las imágenes erosionada y dilatada
 def eliminar_ruido(imagen_erosionada, imagen_dilatada):
