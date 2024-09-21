@@ -20,8 +20,8 @@ def generar_imagen(n, m, salida_path):
             cv2.circle(imagen, centro, radio, color_figura, -1)
         elif figura == 'rectangulo':
             esquina1 = (random.randint(0, n-1), random.randint(0, m-1))
-            esquina2 = (random.randint(esquina1[0], min(esquina1[0] + tamano_figura, n-1)),
-                        random.randint(esquina1[1], min(esquina1[1] + tamano_figura, m-1)))
+            esquina2 = (random.randint(esquina1[0], min(esquina1[0] + int(tamano_figura), n-1)),
+                        random.randint(esquina1[1], min(esquina1[1] + int(tamano_figura), m-1)))
             cv2.rectangle(imagen, esquina1, esquina2, color_figura, -1)
         elif figura == 'triangulo':
             p1 = (random.randint(0, n-1), random.randint(0, m-1))
