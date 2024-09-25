@@ -167,7 +167,22 @@ def limpiar():
     print("Imágenes del proceso guardadas en la carpeta 'img'.")
 
     tiempo_transcurrido = tiempo_fin - tiempo_inicio
-    print(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos")
+    if tiempo_transcurrido < 60:
+        print(f"Tiempo transcurrido: {tiempo_transcurrido:.2f} segundos")
+    elif tiempo_transcurrido < 3600:
+        minutos = int(tiempo_transcurrido // 60)
+        segundos = tiempo_transcurrido % 60
+        print(f"Tiempo transcurrido: {minutos} minutos y {segundos:.2f} segundos")
+    else:
+        horas = int(tiempo_transcurrido // 3600)
+        minutos = int((tiempo_transcurrido % 3600) // 60)
+        segundos = tiempo_transcurrido % 60
+        print(f"Tiempo transcurrido: {horas} horas, {minutos} minutos y {segundos:.2f} segundos")
 
     with open('tiempo_ejecucion.txt', 'w') as archivo:
-        archivo.write(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos\n")
+        if tiempo_transcurrido < 60:
+            archivo.write(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos\n")
+        elif tiempo_transcurrido < 3600:
+            archivo.write(f"Tiempo total de limpieza: {minutos} minutos y {segundos:.2f} segundos\n")
+        else:
+            archivo.write(f"Tiempo total de limpieza: {horas} horas, {minutos} minutos y {segundos:.2f} segundos\n")
