@@ -8,7 +8,7 @@ def generar_imagen(n, m, salida_path):
     imagen = np.full((m, n, 3), fondo_color, dtype=np.uint8)
 
     # Calcular el tamaño máximo de las figuras geométricas
-    tamano_figura = min(n, m)/5
+    tamano_figura = int(min(n, m) / 5)  # Convertir a entero
 
     # Generar una secuencia aleatoria de figuras geométricas
     for _ in range(10):  # Número de figuras a dibujar
