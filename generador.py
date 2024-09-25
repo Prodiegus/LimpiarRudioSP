@@ -38,4 +38,4 @@ def generar_imagen(n, m, salida_path):
 tamaño = int(input("Ingrese el tamaño de la imagen x: "))
 altura = int(input("Ingrese el tamaño de la imagen y: "))
 generar_imagen(tamaño, altura, 'pic.png')
-print("Imagen generada con éxito.")
+print("Imagen generada con éxito. en ruta: ./pic.png")

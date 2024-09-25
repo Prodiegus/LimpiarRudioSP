@@ -6,8 +6,8 @@ from scipy.ndimage import grey_erosion, grey_dilation
 from PIL import Image
 from tqdm import tqdm
 
-from dilatar import Dilatador
-from erosionar import Erosionador
+from noparalelo.dilatar import Dilatador
+from noparalelo.erosionar import Erosionador
 
 # Cargar imagen en formato RGB
 def cargar_imagen(filepath):
@@ -35,8 +35,8 @@ def eliminar_ruido(imagen_erosionada, imagen_dilatada):
 
 # Guardar imagen en una carpeta
 def guardar_imagen(imagen, nombre_archivo):
-    if not os.path.exists('img'):
-        os.makedirs('img')
+    if not os.path.exists('noparaleno/img'):
+        os.makedirs('img', exist_ok=True)
     
     print(f"Guardando imagen '{nombre_archivo}.png'...")
     
@@ -122,12 +122,11 @@ def quitar_sal(imagen):
     pbar.close()
     return imagen_sin_sal
 
-# Ejemplo de uso
-if __name__ == '__main__':
-    imagen = cargar_imagen('../imagen.png')
+def limpiar():
+    imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
-    
+
     # Limpiar la pantalla y avisar el inicio
     os.system('clear')
     print("Iniciando la limpieza de la imagen sacando sal y pimienta...")
@@ -140,7 +139,7 @@ if __name__ == '__main__':
 
     os.system('clear')
     print("Iniciando erosion y dilatacion...")
-    
+
     for i in range(procesamiento):
         imagen_erosionada = erosionar_imagen(imagen_sin_pimienta, elemento_estructurante)
         print("imagen erosionada: ", i)

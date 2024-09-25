@@ -207,12 +207,11 @@ def quitar_sal(imagen):
     pbar.close()
     return resultado
 
-# Ejemplo de uso
-if __name__ == '__main__':
+def limpiar():    
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
-    
+
     # Limpiar la pantalla y avisar el inicio
     os.system('clear')
     print("Iniciando la limpieza de la imagen sacando sal y pimienta...")
@@ -227,7 +226,7 @@ if __name__ == '__main__':
 
     os.system('clear')
     print("Iniciando erosion y dilatacion...")
-    
+
     for i in range(procesamiento):
         imagen_erosionada = erosionar_imagen(imagen_sin_pimienta, elemento_estructurante)
         print("imagen erosionada: ", i)
