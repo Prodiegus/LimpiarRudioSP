@@ -5,71 +5,27 @@ import numpy as np
 from scipy.ndimage import grey_erosion, grey_dilation
 from PIL import Image
 from tqdm import tqdm
-import threading
+
+from dilatar import Dilatador
+from erosionar import Erosionador
 
 # Cargar imagen en formato RGB
 def cargar_imagen(filepath):
     return np.array(Image.open(filepath))
 
-# Función para aplicar erosión a un canal
-def erosionar_canal(canal, estructura, resultado, indice):
-    resultado[indice] = grey_erosion(canal, footprint=estructura)
-
-# Función para aplicar dilatación a un canal
-def dilatar_canal(canal, estructura, resultado, indice):
-    resultado[indice] = grey_dilation(canal, footprint=estructura)
-
-# Aplicar Erosión a cada canal de la imagen
 def erosionar_imagen(imagen, estructura):
     print("erosionando la imagen")
-    r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
-    
-    # Crear una lista para almacenar los resultados
-    resultado = [None, None, None]
-    
-    # Crear hilos para cada canal
-    hilos = [
-        threading.Thread(target=erosionar_canal, args=(r, estructura, resultado, 0)),
-        threading.Thread(target=erosionar_canal, args=(g, estructura, resultado, 1)),
-        threading.Thread(target=erosionar_canal, args=(b, estructura, resultado, 2))
-    ]
-    
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
-    
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
-    
+    erosionador = Erosionador(estructura)
+    imagen_erosionada = erosionador.aplicar_erosion(imagen)
     print("erosion terminada")
-    return np.stack(resultado, axis=-1)
+    return imagen_erosionada
 
-# Aplicar Dilatación a cada canal de la imagen
 def dilatar_imagen(imagen, estructura):
     print("dilatando la imagen")
-    r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
-    
-    # Crear una lista para almacenar los resultados
-    resultado = [None, None, None]
-    
-    # Crear hilos para cada canal
-    hilos = [
-        threading.Thread(target=dilatar_canal, args=(r, estructura, resultado, 0)),
-        threading.Thread(target=dilatar_canal, args=(g, estructura, resultado, 1)),
-        threading.Thread(target=dilatar_canal, args=(b, estructura, resultado, 2))
-    ]
-    
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
-    
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
-    
+    dilatador = Dilatador(estructura)
+    imagen_dilatada = dilatador.aplicar_dilatacion(imagen)
     print("dilatacion terminada")
-    return np.stack(resultado, axis=-1)
+    return imagen_dilatada
 
 # Generar imagen sin ruido a partir de las imágenes erosionada y dilatada
 def eliminar_ruido(imagen_erosionada, imagen_dilatada):
@@ -125,6 +81,7 @@ def incrementar_saturacion(imagen, factor):
     imagen_rgb = cv2.cvtColor(imagen_hsv, cv2.COLOR_HSV2RGB)
     
     return imagen_rgb
+
 def procesar_pimienta_parcial(imagen, inicio, fin, resultado, pbar):
     for i in range(inicio, fin):
         for j in range(imagen.shape[1]):
@@ -136,35 +93,14 @@ def quitar_pimienta(imagen):
     print("copiamos la imagen")
     imagen_sin_pimienta = imagen.copy()
     
-    # Dividir la imagen en 10 porciones
-    num_hilos = 6
-    h, w, _ = imagen.shape
-    porcion = h // num_hilos
-    
-    # Crear una lista para almacenar los resultados parciales
-    resultado = imagen_sin_pimienta.copy()
-    
     # Crear una barra de progreso
-    pbar = tqdm(total=h, desc="Procesando filas (quitar pimienta)")
+    pbar = tqdm(total=imagen.shape[0], desc="Procesando filas (quitar pimienta)")
     
-    # Crear hilos para procesar cada porción
-    hilos = []
-    for i in range(num_hilos):
-        inicio = i * porcion
-        fin = (i + 1) * porcion if i != num_hilos - 1 else h
-        hilo = threading.Thread(target=procesar_pimienta_parcial, args=(imagen, inicio, fin, resultado, pbar))
-        hilos.append(hilo)
-    
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
-    
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
+    # Procesar toda la imagen secuencialmente
+    procesar_pimienta_parcial(imagen, 0, imagen.shape[0], imagen_sin_pimienta, pbar)
     
     pbar.close()
-    return resultado
+    return imagen_sin_pimienta
 
 def procesar_sal_parcial(imagen, inicio, fin, resultado, pbar):
     for i in range(inicio, fin):
@@ -177,48 +113,25 @@ def quitar_sal(imagen):
     print("copiamos la imagen")
     imagen_sin_sal = imagen.copy()
     
-    # Dividir la imagen en 10 porciones
-    num_hilos = 10
-    h, w, _ = imagen.shape
-    porcion = h // num_hilos
-    
-    # Crear una lista para almacenar los resultados parciales
-    resultado = imagen_sin_sal.copy()
-    
     # Crear una barra de progreso
-    pbar = tqdm(total=h, desc="Procesando filas (quitar sal)")
+    pbar = tqdm(total=imagen.shape[0], desc="Procesando filas (quitar sal)")
     
-    # Crear hilos para procesar cada porción
-    hilos = []
-    for i in range(num_hilos):
-        inicio = i * porcion
-        fin = (i + 1) * porcion if i != num_hilos - 1 else h
-        hilo = threading.Thread(target=procesar_sal_parcial, args=(imagen, inicio, fin, resultado, pbar))
-        hilos.append(hilo)
-    
-    # Iniciar los hilos
-    for hilo in hilos:
-        hilo.start()
-    
-    # Esperar a que todos los hilos terminen
-    for hilo in hilos:
-        hilo.join()
+    # Procesar toda la imagen secuencialmente
+    procesar_sal_parcial(imagen, 0, imagen.shape[0], imagen_sin_sal, pbar)
     
     pbar.close()
-    return resultado
+    return imagen_sin_sal
 
 # Ejemplo de uso
 if __name__ == '__main__':
-    imagen = cargar_imagen('imagen.png')
+    imagen = cargar_imagen('../imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
     
     # Limpiar la pantalla y avisar el inicio
     os.system('clear')
     print("Iniciando la limpieza de la imagen sacando sal y pimienta...")
-
     tiempo_inicio = time.time()
-
     imagen_sin_sal = quitar_sal(imagen)
     print("\nimagen sin sal")
     imagen_sin_pimienta = quitar_pimienta(imagen)
@@ -233,10 +146,8 @@ if __name__ == '__main__':
         print("imagen erosionada: ", i)
         imagen_dilatada = dilatar_imagen(imagen_sin_sal, elemento_estructurante)
         print("imagen dilatada: ", i)
-        #imagen_sin_sal = quitar_sal(imagen_erosionada)
         imagen_sin_sal = imagen_dilatada
         print("\nimagen sin sal: ", i)
-        #imagen_sin_pimienta = quitar_pimienta(imagen_dilatada)
         imagen_sin_pimienta = imagen_erosionada
         print("\nimagen sin pimienta: ", i)
 
@@ -244,9 +155,7 @@ if __name__ == '__main__':
     print("quitando el ruido de la imagen...")
     # Eliminar ruido de la imagen
     imagen_sin_ruido = eliminar_ruido(imagen_erosionada, imagen_dilatada)
-
     tiempo_fin = time.time()
-
     # Guardar todas las versiones de la imagen
     print("Guardando imágenes del proceso...")
     guardar_imagen(imagen, 'imagen_original')
@@ -259,7 +168,7 @@ if __name__ == '__main__':
     print("Imágenes del proceso guardadas en la carpeta 'img'.")
 
     tiempo_transcurrido = tiempo_fin - tiempo_inicio
-    print(f"Tiempo transcurrido: {tiempo_transcurrido:.2f} segundos")
+    print(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos")
 
     with open('tiempo_ejecucion.txt', 'w') as archivo:
         archivo.write(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos\n")
