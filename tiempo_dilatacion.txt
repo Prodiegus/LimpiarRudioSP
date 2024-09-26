@@ -1,1 +1,1 @@
-Tiempo de dilatación: 0.05 segundos
+Tiempo de dilatación: 0.04 segundos

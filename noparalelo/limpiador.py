@@ -175,11 +175,10 @@ def borrar_imagenes(directorio):
         except Exception as e:
             print(f"No se pudo borrar la imagen {imagen}: {e}")
 
-def limpiar():
+def limpiar(estructurante, procesamiento):
     borrar_imagenes('noparalelo/img')
     imagen = cargar_imagen('imagen.png')
-    elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
-    procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
+    elemento_estructurante = estructurante
 
     # Limpiar la pantalla y avisar el inicio
     limpiar_pantalla()
@@ -196,13 +195,13 @@ def limpiar():
 
     for i in range(procesamiento):
         imagen_erosionada = erosionar_imagen(imagen_sin_pimienta, elemento_estructurante)
-        print("imagen erosionada: ", i)
+        print("imagen erosionada: ", i+1)
         imagen_dilatada = dilatar_imagen(imagen_sin_sal, elemento_estructurante)
-        print("imagen dilatada: ", i)
+        print("imagen dilatada: ", i+1)
         imagen_sin_sal = imagen_dilatada
-        print("\nimagen sin sal: ", i)
+        print("\nimagen sin sal: ", i+1)
         imagen_sin_pimienta = imagen_erosionada
-        print("\nimagen sin pimienta: ", i)
+        print("\nimagen sin pimienta: ", i+1)
 
     limpiar_pantalla()
     print("quitando el ruido de la imagen...")

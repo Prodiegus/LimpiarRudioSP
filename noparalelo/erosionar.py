@@ -26,7 +26,7 @@ class Erosionador:
 
         pbar = tqdm(total=filas * columnas, desc="Aplicando erosión gris")
 
-        # Aplicar erosión gris
+       # Aplicar erosión gris
         for i in range(filas):
             for j in range(columnas):
                 # Obtener la región de la imagen que se superpone con el elemento estructurante
@@ -39,7 +39,7 @@ class Erosionador:
                                        mode='constant', constant_values=255)
                 
                 # Aplicar el elemento estructurante a la región
-                min_valor = np.min(region_padded * estructura)
+                min_valor = np.min(region_padded[:ef, :ec][estructura == 1])
                 imagen_erosionada[i, j] = min_valor
 
                 # Actualizar la barra de progreso
@@ -47,19 +47,16 @@ class Erosionador:
         pbar.close()
         return imagen_erosionada
 
-    def aplicar_erosion(self):
-        if self.imagen is None:
-            raise ValueError("No se ha cargado ninguna imagen.")
-        
-        r, g, b = self.imagen[:,:,0], self.imagen[:,:,1], self.imagen[:,:,2]
+    def aplicar_erosion(self, imagen):
+        r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
         
         # Aplicar erosión a cada canal
         r_erosion = self.grey_erosion(r, self.estructura)
         g_erosion = self.grey_erosion(g, self.estructura)
         b_erosion = self.grey_erosion(b, self.estructura)
         
-        self.imagen_erosionada = np.stack((r_erosion, g_erosion, b_erosion), axis=-1)
-        return self.imagen_erosionada
+        imagen_erosionada = np.stack((r_erosion, g_erosion, b_erosion), axis=-1)
+        return imagen_erosionada
     
     def aplicar_erosion(self, canal):
         canal_erosion = self.grey_erosion(canal, self.estructura)

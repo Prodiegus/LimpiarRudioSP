@@ -39,27 +39,24 @@ class Dilatador:
                                        mode='constant', constant_values=0)
                 
                 # Aplicar el elemento estructurante a la región
-                max_valor = np.max(region_padded * estructura)
+                max_valor = np.max(region_padded[:ef, :ec] * estructura)
                 imagen_dilatada[i, j] = max_valor
 
                 # Actualizar la barra de progreso
                 pbar.update(1)
         pbar.close()
         return imagen_dilatada
-    
-    def aplicar_dilatacion(self):
-        if self.imagen is None:
-            raise ValueError("No se ha cargado ninguna imagen.")
-        
-        r, g, b = self.imagen[:,:,0], self.imagen[:,:,1], self.imagen[:,:,2]
+
+    def aplicar_dilatacion(self, imagen):
+        r, g, b = imagen[:,:,0], imagen[:,:,1], imagen[:,:,2]
         
         # Aplicar dilatación a cada canal
         r_dilatacion = self.grey_dilation(r, self.estructura)
         g_dilatacion = self.grey_dilation(g, self.estructura)
         b_dilatacion = self.grey_dilation(b, self.estructura)
         
-        self.imagen_dilatada = np.stack((r_dilatacion, g_dilatacion, b_dilatacion), axis=-1)
-        return self.imagen_dilatada
+        imagen_dilatada = np.stack((r_dilatacion, g_dilatacion, b_dilatacion), axis=-1)
+        return imagen_dilatada
     
     def aplicar_dilatacion(self, canal):
         canal_dilatacion = self.grey_dilation(canal, self.estructura)

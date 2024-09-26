@@ -279,11 +279,10 @@ def borrar_imagenes(directorio):
             print(f"No se pudo borrar la imagen {imagen}: {e}")
 
 
-def limpiar():    
+def limpiar(estructurante, procesamiento):    
     borrar_imagenes('img')
     imagen = cargar_imagen('imagen.png')
-    elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
-    procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
+    elemento_estructurante = estructurante
 
     # Limpiar la pantalla y avisar el inicio
     limpiar_pantalla()
