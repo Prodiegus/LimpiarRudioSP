@@ -1,3 +1,4 @@
+import glob
 import os
 import time
 import cv2
@@ -14,17 +15,48 @@ def cargar_imagen(filepath):
     return np.array(Image.open(filepath))
 
 def erosionar_imagen(imagen, estructura):
+    tiempo_inicio = time.time()
     print("erosionando la imagen")
     erosionador = Erosionador(estructura)
     imagen_erosionada = erosionador.aplicar_erosion(imagen)
     print("erosion terminada")
+    tiempo_fin = time.time()
+    tiempo_transcurrido = tiempo_fin - tiempo_inicio
+    
+    with open('noparalelo/tiempo_erosion.txt', 'w') as archivo:
+        if tiempo_transcurrido < 60:
+            archivo.write(f"Tiempo de erosión: {tiempo_transcurrido:.2f} segundos\n")
+        elif tiempo_transcurrido < 3600:
+            minutos = int(tiempo_transcurrido // 60)
+            segundos = tiempo_transcurrido % 60 
+            archivo.write(f"Tiempo de erosión: {minutos} minutos y {segundos:.2f} segundos\n")
+        else:
+            horas = int(tiempo_transcurrido // 3600)
+            minutos = int((tiempo_transcurrido % 3600) // 60)
+            segundos = tiempo_transcurrido % 3600
+            archivo.write(f"Tiempo de erosión: {horas} horas, {minutos} minutos y {segundos:.2f} segundos\n")       
     return imagen_erosionada
 
 def dilatar_imagen(imagen, estructura):
+    tiempo_inicio = time.time()
     print("dilatando la imagen")
     dilatador = Dilatador(estructura)
     imagen_dilatada = dilatador.aplicar_dilatacion(imagen)
     print("dilatacion terminada")
+    tiempo_fin = time.time()
+    tiempo_transcurrido = tiempo_fin - tiempo_inicio
+    with open('noparalelo/tiempo_dilatacion.txt', 'w') as archivo:
+        if tiempo_transcurrido < 60:
+            archivo.write(f"Tiempo de dilatación: {tiempo_transcurrido:.2f} segundos\n")
+        elif tiempo_transcurrido < 3600:
+            minutos = int(tiempo_transcurrido // 60)
+            segundos = tiempo_transcurrido % 60
+            archivo.write(f"Tiempo de dilatación: {minutos} minutos y {segundos:.2f} segundos\n")
+        else:
+            horas = int(tiempo_transcurrido // 3600)
+            minutos = int((tiempo_transcurrido % 3600) // 60)
+            segundos = tiempo_transcurrido % 3600
+            archivo.write(f"Tiempo de dilatación: {horas} horas, {minutos} minutos y {segundos:.2f} segundos\n")
     return imagen_dilatada
 
 # Generar imagen sin ruido a partir de las imágenes erosionada y dilatada
@@ -35,13 +67,13 @@ def eliminar_ruido(imagen_erosionada, imagen_dilatada):
 
 # Guardar imagen en una carpeta
 def guardar_imagen(imagen, nombre_archivo):
-    if not os.path.exists('noparaleno/img'):
-        os.makedirs('img', exist_ok=True)
+    if not os.path.exists('noparalelo/img'):
+        os.makedirs('noparalelo/img')
     
     print(f"Guardando imagen '{nombre_archivo}.png'...")
     
     imagen_pil = Image.fromarray(imagen.astype('uint8'))
-    imagen_pil.save(f'img/{nombre_archivo}.png')
+    imagen_pil.save(f'noparalelo/img/{nombre_archivo}.png')
 
 # ajustar la intensidad de los pixeles
 def ajustar_imagen(imagen, factor):
@@ -128,7 +160,23 @@ def limpiar_pantalla():
     else:  # Para Linux y macOS
         os.system('clear')
 
+def borrar_imagenes(directorio):
+    # Obtener la lista de archivos en el directorio que tienen extensiones de imagen comunes
+    imagenes = glob.glob(os.path.join(directorio, "*.png")) + \
+               glob.glob(os.path.join(directorio, "*.jpg")) + \
+               glob.glob(os.path.join(directorio, "*.jpeg")) + \
+               glob.glob(os.path.join(directorio, "*.bmp")) + \
+               glob.glob(os.path.join(directorio, "*.gif"))
+
+    # Borrar cada archivo encontrado
+    for imagen in imagenes:
+        try:
+            os.remove(imagen)
+        except Exception as e:
+            print(f"No se pudo borrar la imagen {imagen}: {e}")
+
 def limpiar():
+    borrar_imagenes('noparalelo/img')
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
@@ -182,10 +230,10 @@ def limpiar():
     else:
         horas = int(tiempo_transcurrido // 3600)
         minutos = int((tiempo_transcurrido % 3600) // 60)
-        segundos = tiempo_transcurrido % 60
+        segundos = tiempo_transcurrido % 3600
         print(f"Tiempo transcurrido: {horas} horas, {minutos} minutos y {segundos:.2f} segundos")
 
-    with open('tiempo_ejecucion.txt', 'w') as archivo:
+    with open('noparalelo/tiempo_ejecucion.txt', 'w') as archivo:
         if tiempo_transcurrido < 60:
             archivo.write(f"Tiempo total de limpieza: {tiempo_transcurrido:.2f} segundos\n")
         elif tiempo_transcurrido < 3600:

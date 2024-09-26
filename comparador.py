@@ -49,10 +49,16 @@ def imprimir_contenido_txt(ruta_archivo):
         print(f"El archivo {ruta_archivo} no se encontró.")
     except Exception as e:
         print(f"Ocurrió un error al leer el archivo: {e}")
+        
 # Ejemplo de uso
-print("Comparando imágenes paralelas...")
-comparar_similitud('pic.png', 'img')
-imprimir_contenido_txt('tiempo_ejecucion.txt')
-print("Comparando imágenes no paralelas...")
-comparar_similitud('pic.png', 'noparalelo/img')
-imprimir_contenido_txt('noparalelo/tiempo_ejecucion.txt')
+def comparar():
+    print("Comparando imágenes paralelas...")
+    comparar_similitud('pic.png', 'img')
+    imprimir_contenido_txt('tiempo_ejecucion.txt')
+    imprimir_contenido_txt('tiempo_dilatacion.txt')
+    imprimir_contenido_txt('tiempo_erosion.txt')
+    print("Comparando imágenes no paralelas...")
+    comparar_similitud('pic.png', 'noparalelo/img')
+    imprimir_contenido_txt('noparalelo/tiempo_ejecucion.txt')
+    imprimir_contenido_txt('noparalelo/tiempo_dilatacion.txt')
+    imprimir_contenido_txt('noparalelo/tiempo_erosion.txt')

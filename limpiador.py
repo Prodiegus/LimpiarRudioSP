@@ -1,3 +1,4 @@
+import glob
 import os
 import time
 import cv2
@@ -36,7 +37,7 @@ def erosionar_imagen(imagen, estructura):
     
     canales = [r, g, b]
     imagen_erosionada = []
-
+    tiempo_inicio = time.time()
     # Crear un pool de procesos
     with mp.Pool(processes=particiones) as pool:
         for canal in canales:
@@ -54,6 +55,20 @@ def erosionar_imagen(imagen, estructura):
 
     # Combinar los canales erosionados nuevamente en una imagen RGB
     imagen_final = cv2.merge(imagen_erosionada)
+    tiempo_final = time.time()
+    tiempo_transcurrido = tiempo_final - tiempo_inicio
+    with open('tiempo_erosion.txt', 'w') as archivo:
+        if tiempo_transcurrido < 60:
+            archivo.write(f"Tiempo de erosión: {tiempo_transcurrido:.2f} segundos\n")
+        elif tiempo_transcurrido < 3600:
+            minutos = int(tiempo_transcurrido // 60)
+            segundos = tiempo_transcurrido % 60
+            archivo.write(f"Tiempo de erosión: {minutos} minutos y {segundos:.2f} segundos\n")
+        else:
+            horas = int(tiempo_transcurrido // 3600)
+            minutos = int((tiempo_transcurrido % 3600) // 60)
+            segundos = tiempo_transcurrido % 3600
+            archivo.write(f"Tiempo de erosión: {horas} horas, {minutos} minutos y {segundos:.2f} segundos\n")
     
     print("Erosión terminada")
     return imagen_final
@@ -71,7 +86,7 @@ def dilatar_imagen(imagen, estructura):
     
     canales = [r, g, b]
     imagen_dilatada = []
-
+    tiempo_inicio = time.time()
     # Crear un pool de procesos
     with mp.Pool(processes=particiones) as pool:
         for canal in canales:
@@ -89,7 +104,20 @@ def dilatar_imagen(imagen, estructura):
 
     # Combinar los canales erosionados nuevamente en una imagen RGB
     imagen_final = cv2.merge(imagen_dilatada)
-    
+    tiempo_final = time.time()
+    tiempo_transcurrido = tiempo_final - tiempo_inicio
+    with open('tiempo_dilatacion.txt', 'w') as archivo:
+        if tiempo_transcurrido < 60:
+            archivo.write(f"Tiempo de dilatación: {tiempo_transcurrido:.2f} segundos\n")
+        elif tiempo_transcurrido < 3600:
+            minutos = int(tiempo_transcurrido // 60)
+            segundos = tiempo_transcurrido % 60
+            archivo.write(f"Tiempo de dilatación: {minutos} minutos y {segundos:.2f} segundos\n")
+        else:
+            horas = int(tiempo_transcurrido // 3600)
+            minutos = int((tiempo_transcurrido % 3600) // 60)
+            segundos = tiempo_transcurrido % 3600
+            archivo.write(f"Tiempo de dilatación: {horas} horas, {minutos} minutos y {segundos:.2f} segundos\n")
     print("Dilatación terminada")
     return imagen_final
 
@@ -235,8 +263,24 @@ def limpiar_pantalla():
     else:  # Para Linux y macOS
         os.system('clear')
 
+def borrar_imagenes(directorio):
+    # Obtener la lista de archivos en el directorio que tienen extensiones de imagen comunes
+    imagenes = glob.glob(os.path.join(directorio, "*.png")) + \
+               glob.glob(os.path.join(directorio, "*.jpg")) + \
+               glob.glob(os.path.join(directorio, "*.jpeg")) + \
+               glob.glob(os.path.join(directorio, "*.bmp")) + \
+               glob.glob(os.path.join(directorio, "*.gif"))
+
+    # Borrar cada archivo encontrado
+    for imagen in imagenes:
+        try:
+            os.remove(imagen)
+        except Exception as e:
+            print(f"No se pudo borrar la imagen {imagen}: {e}")
+
 
 def limpiar():    
+    borrar_imagenes('img')
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación

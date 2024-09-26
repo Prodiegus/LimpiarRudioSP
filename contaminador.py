@@ -24,6 +24,7 @@ def agregar_ruido_sal_pimienta(imagen_path, porcentaje_ruido, salida_path):
     cv2.imwrite(salida_path, imagen)
 
 # Ejemplo de uso
-ruta = input("Ingrese la ruta de la imagen: ")
-porcentaje = float(input("Ingrese el porcentaje de ruido: "))
-agregar_ruido_sal_pimienta(ruta, porcentaje, 'imagen.png')
+def contaminar():
+    ruta = input("Ingrese la ruta de la imagen: ")
+    porcentaje = float(input("Ingrese el porcentaje de ruido: "))
+    agregar_ruido_sal_pimienta(ruta, porcentaje, 'imagen.png')

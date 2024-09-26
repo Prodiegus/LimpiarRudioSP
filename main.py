@@ -55,10 +55,10 @@ while True:
 
     if opcion == "1":
         limpiar_pantalla()
-        importlib.import_module('comparador').__init__
+        importlib.import_module('comparador').comparar()
     elif opcion == "2":
         limpiar_pantalla()
-        importlib.import_module('contaminador').__init__
+        importlib.import_module('contaminador').contaminar()
     elif opcion == "3":
         limpiar_pantalla()
         importlib.import_module('limpiador').limpiar()
@@ -67,7 +67,7 @@ while True:
         importlib.import_module('noparalelo.limpiador').limpiar()
     elif opcion == "5":
         limpiar_pantalla()
-        importlib.import_module('generador').__init__
+        importlib.import_module('generador').generar()
     elif opcion == "6":
         print("Saliendo del programa.")
         break
