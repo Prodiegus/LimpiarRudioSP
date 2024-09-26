@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 import importlib
 
 def mostrar_menu():
@@ -17,6 +19,38 @@ def limpiar_pantalla():
 
 print("6. Salir")
 
+# Lista de dependencias necesarias
+dependencias = [
+    "opencv-python",
+    "numpy",
+    "scipy",
+    "pillow",
+    "tqdm"
+]
+
+def instalar_pip():
+    print("Instalando pip...")
+    subprocess.check_call([sys.executable, "-m", "ensurepip", "--upgrade"])
+
+def instalar_dependencias():
+    for paquete in dependencias:
+        try:
+            __import__(paquete)
+        except ImportError:
+            print(f"Instalando {paquete}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", paquete])
+
+def verificar_e_instalar():
+    print("Verificando dependencias...")
+    try:
+        import pip
+        print("pip ya está instalado.")
+    except ImportError:
+        instalar_pip()
+    instalar_dependencias()
+
+verificar_e_instalar()
+limpiar_pantalla()
 while True:
     mostrar_menu()
     opcion = input("Ingrese el número de la opción: ")
