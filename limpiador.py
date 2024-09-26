@@ -211,7 +211,7 @@ def limpiar_pantalla():
     if os.name == 'nt':  # Para Windows
         os.system('cls')
     else:  # Para Linux y macOS
-        limpiar_pantalla()
+        os.system('clear')
 
 
 def limpiar():    
