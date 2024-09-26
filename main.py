@@ -18,13 +18,13 @@ def limpiar_pantalla():
         os.system('clear')
         
 # Lista de dependencias necesarias
-dependencias = [
-    "opencv-python",
-    "numpy",
-    "scipy",
-    "pillow",
-    "tqdm"
-]
+dependencias = {
+    "opencv-python": "cv2",
+    "numpy": "numpy",
+    "scipy": "scipy",
+    "pillow": "PIL",
+    "tqdm": "tqdm"
+}
 
 def instalar_pip():
     print("Instalando pip...")
