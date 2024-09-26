@@ -16,9 +16,7 @@ def limpiar_pantalla():
         os.system('cls')
     else:  # Para Linux y macOS
         os.system('clear')
-
-print("6. Salir")
-
+        
 # Lista de dependencias necesarias
 dependencias = [
     "opencv-python",
