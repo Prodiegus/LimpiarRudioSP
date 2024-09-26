@@ -122,13 +122,19 @@ def quitar_sal(imagen):
     pbar.close()
     return imagen_sin_sal
 
+def limpiar_pantalla():
+    if os.name == 'nt':  # Para Windows
+        os.system('cls')
+    else:  # Para Linux y macOS
+        os.system('clear')
+
 def limpiar():
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = np.ones((3, 3))  # Elemento estructurante 3x3
     procesamiento = 4 # Número de veces que se aplicará erosión y dilatación
 
     # Limpiar la pantalla y avisar el inicio
-    os.system('clear')
+    limpiar_pantalla()
     print("Iniciando la limpieza de la imagen sacando sal y pimienta...")
     tiempo_inicio = time.time()
     imagen_sin_sal = quitar_sal(imagen)
@@ -137,7 +143,7 @@ def limpiar():
     print("\nimagen sin pimienta")
 
 
-    os.system('clear')
+    limpiar_pantalla()
     print("Iniciando erosion y dilatacion...")
 
     for i in range(procesamiento):
@@ -150,7 +156,7 @@ def limpiar():
         imagen_sin_pimienta = imagen_erosionada
         print("\nimagen sin pimienta: ", i)
 
-    os.system('clear')
+    limpiar_pantalla()
     print("quitando el ruido de la imagen...")
     # Eliminar ruido de la imagen
     imagen_sin_ruido = eliminar_ruido(imagen_erosionada, imagen_dilatada)
