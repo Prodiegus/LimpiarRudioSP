@@ -135,6 +135,7 @@ while True:
         importlib.import_module('generador').generar()
     elif opcion == "6":
         print("Saliendo del programa.")
+        limpiar_pantalla()
         break
     else:
         print("Opción no válida. Intente nuevamente.")

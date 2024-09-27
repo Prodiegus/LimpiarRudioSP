@@ -280,7 +280,7 @@ def borrar_imagenes(directorio):
 
 
 def limpiar(estructurante, procesamiento):    
-    borrar_imagenes('img')
+    #borrar_imagenes('img')
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = estructurante
 

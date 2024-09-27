@@ -176,7 +176,7 @@ def borrar_imagenes(directorio):
             print(f"No se pudo borrar la imagen {imagen}: {e}")
 
 def limpiar(estructurante, procesamiento):
-    borrar_imagenes('noparalelo/img')
+    #borrar_imagenes('noparalelo/img')
     imagen = cargar_imagen('imagen.png')
     elemento_estructurante = estructurante
 

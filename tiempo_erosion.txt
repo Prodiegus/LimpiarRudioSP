@@ -1,1 +1,1 @@
-Tiempo de erosión: 0.03 segundos
+Tiempo de erosión: 0.07 segundos

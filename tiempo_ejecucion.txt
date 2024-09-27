@@ -1,1 +1,1 @@
-Tiempo total de limpieza: 0.67 segundos
+Tiempo total de limpieza: 6.78 segundos
